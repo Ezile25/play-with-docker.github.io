@@ -1,0 +1,345 @@
+[node1] (local) root@192.168.0.13 ~
+$     git clone https://github.com/dockersamples/linux_tweet_app
+Cloning into 'linux_tweet_app'...
+remote: Enumerating objects: 14, done.
+remote: Counting objects: 100% (8/8), done.
+remote: Compressing objects: 100% (4/4), done.
+remote: Total 14 (delta 4), reused 4 (delta 4), pack-reused 6
+Receiving objects: 100% (14/14), 10.79 KiB | 2.70 MiB/s, done.
+Resolving deltas: 100% (5/5), done.
+[node1] (local) root@192.168.0.13 ~
+$  docker container run alpine hostname
+Unable to find image 'alpine:latest' locally
+latest: Pulling from library/alpine
+8921db27df28: Pull complete
+Digest: sha256:f271e74b17ced29b915d351685fd4644785c6d1559dd1f2d4189a5e851ef753a
+Status: Downloaded newer image for alpine:latest
+8a87399773c6
+[node1] (local) root@192.168.0.13 ~
+$  docker container ls --all
+CONTAINER ID   IMAGE     COMMAND      CREATED              STATUS          PORTS     NAMES
+8a87399773c6   alpine    "hostname"   About a minute ago   Exited (0) About a minute ago             fervent_matsumoto
+[node1] (local) root@192.168.0.13 ~
+$  docker container run --interactive --tty --rm ubuntu bash
+Unable to find image 'ubuntu:latest' locally
+latest: Pulling from library/ubuntu
+6e3729cf69e0: Pull complete
+Digest: sha256:27cb6e6ccef575a4698b66f5de06c7ecd61589132d5a91d098f7f3f9285415a9
+Status: Downloaded newer image for ubuntu:latest
+root@960c76a522b5:/# ls /
+bin   dev  home  lib32  libx32  mnt  proc  run   srv  tmp  var
+boot  etc  lib   lib64  media   opt  root  sbin  sys  usr
+root@960c76a522b5:/# ps aux
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root         1  0.0  0.0   4620  3736 pts/0    Ss   07:54   0:00 bash
+root        10  0.0  0.0   7052  1588 pts/0    R+   07:56   0:00 ps aux
+root@960c76a522b5:/# cat /etc/issue
+Ubuntu 22.04.1 LTS \n \l
+
+root@960c76a522b5:/#  exit
+exit
+[node1] (local) root@192.168.0.13 ~
+$  cat /etc/issue
+Welcome to Alpine Linux 3.16
+Kernel \r on an \m (\l)
+
+[node1] (local) root@192.168.0.13 ~
+$  docker container run \
+>  --detach \
+>  --name mydb \
+>  -e MYSQL_ROOT_PASSWORD=my-secret-pw \
+>  mysql:latest
+Unable to find image 'mysql:latest' locally
+latest: Pulling from library/mysql
+0ed027b72ddc: Pull complete
+0296159747f1: Pull complete
+3d2f9b664bd3: Pull complete
+df6519f81c26: Pull complete
+36bb5e56d458: Pull complete
+054e8fde88d0: Pull complete
+f2b494c50c7f: Pull complete
+132bc0d471b8: Pull complete
+135ec7033a05: Extracting  55.11MB/55.11MB
+5961f0272472: Download complete
+75b5f7a3d3a4: Download complete
+docker: failed to register layer: Error processing tar file(exit status 1): write /usr/lib/mysqlsh/lib/python3.9/site-packages/oci/data_integration/models/work_request.py: no space left on device.
+See 'docker run --help'.
+[node1] (local) root@192.168.0.13 ~
+$  docker container ls
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+[node1] (local) root@192.168.0.13 ~
+$  docker container logs mydb
+Error: No such container: mydb
+[node1] (local) root@192.168.0.13 ~
+$    docker container top mydb
+Error response from daemon: No such container: mydb
+[node1] (local) root@192.168.0.13 ~
+$  docker exec -it mydb \
+>  mysql --user=root --password=$MYSQL_ROOT_PASSWORD --version
+Error: No such container: mydb
+[node1] (local) root@192.168.0.13 ~
+$  docker exec -it mydb sh
+Error: No such container: mydb
+[node1] (local) root@192.168.0.13 ~
+$  mysql --user=root --password=$MYSQL_ROOT_PASSWORD --version
+bash: mysql: command not found
+[node1] (local) root@192.168.0.13 ~
+$  exit
+logout
+###############################################################
+#                          WARNING!!!!                        #
+# This is a sandbox environment. Using personal credentials   #
+# is HIGHLY! discouraged. Any consequences of doing so are    #
+# completely the user's responsibilites.                      #
+#                                                             #
+# The PWD team.                                               #
+###############################################################
+[node1] (local) root@192.168.0.13 ~
+$  cd ~/linux_tweet_app
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  cat Dockerfile
+FROM nginx:latest
+
+COPY index.html /usr/share/nginx/html
+COPY linux.png /usr/share/nginx/html
+
+EXPOSE 80 443
+
+CMD ["nginx", "-g", "daemon off;"]
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$ export DOCKERID=<ezilenyangule>
+bash: syntax error near unexpected token `newline'
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  echo $DOCKERID
+
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker image build --tag $DOCKERID/linux_tweet_app:1.0 .
+invalid argument "/linux_tweet_app:1.0" for "-t, --tag" flag: invalid reference format
+See 'docker image build --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker image build --tag $DOCKERID/linux_tweet_app:1.0 .
+invalid argument "/linux_tweet_app:1.0" for "-t, --tag" flag: invalid reference format
+See 'docker image build --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker image build --tag $DOCKERID/linux_tweet_app:1.0 .
+invalid argument "/linux_tweet_app:1.0" for "-t, --tag" flag: invalid reference format
+See 'docker image build --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker image build --tag $DOCKERID/linux_tweet_app:1.0 .
+invalid argument "/linux_tweet_app:1.0" for "-t, --tag" flag: invalid reference format
+See 'docker image build --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker image build --tag $DOCKERID/linux_tweet_app:1.0 .
+invalid argument "/linux_tweet_app:1.0" for "-t, --tag" flag: invalid reference format
+See 'docker image build --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker image build --tag $DOCKERID/linux_tweet_app:1.0 .
+invalid argument "/linux_tweet_app:1.0" for "-t, --tag" flag: invalid reference format
+See 'docker image build --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker image build --tag $DOCKERID/linux_tweet_app:1.0 .
+invalid argument "/linux_tweet_app:1.0" for "-t, --tag" flag: invalid reference format
+See 'docker image build --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker image build --tag $DOCKERID/linux_tweet_app:1.0 .
+invalid argument "/linux_tweet_app:1.0" for "-t, --tag" flag: invalid reference format
+See 'docker image build --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker image build --tag $DOCKERID/linux_tweet_app:1.0 .
+invalid argument "/linux_tweet_app:1.0" for "-t, --tag" flag: invalid reference format
+See 'docker image build --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker image build --tag $DOCKERID/linux_tweet_app:1.0 .
+invalid argument "/linux_tweet_app:1.0" for "-t, --tag" flag: invalid reference format
+See 'docker image build --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker image build --tag $DOCKERID/linux_tweet_app:1.0 .
+invalid argument "/linux_tweet_app:1.0" for "-t, --tag" flag: invalid reference format
+See 'docker image build --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker container run \
+>  --detach \
+>  --publish 80:80 \
+>  --name linux_tweet_app \
+>  $DOCKERID/linux_tweet_app:1.0
+docker: invalid reference format.
+See 'docker run --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker container run \
+>  --detach \
+>  --publish 80:80 \
+>  --name linux_tweet_app \
+>  $DOCKERID/linux_tweet_app:1.0
+docker: invalid reference format.
+See 'docker run --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker container rm --force linux_tweet_app
+Error: No such container: linux_tweet_app
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker container rm --force linux_tweet_app
+Error: No such container: linux_tweet_app
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker container rm --force linux_tweet_app
+Error: No such container: linux_tweet_app
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker container rm --force linux_tweet_app
+Error: No such container: linux_tweet_app
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker container rm --force linux_tweet_app
+Error: No such container: linux_tweet_app
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker container rm --force linux_tweet_app
+Error: No such container: linux_tweet_app
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker container rm --force linux_tweet_app
+Error: No such container: linux_tweet_app
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker container run \
+>  --detach \
+>  --publish 80:80 \
+>  --name linux_tweet_app \
+>  --mount type=bind,source="$(pwd)",target=/usr/share/nginx/html \
+>  $DOCKERID/linux_tweet_app:1.0
+docker: invalid reference format.
+See 'docker run --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker container run \
+>  --detach \
+>  --publish 80:80 \
+>  --name linux_tweet_app \
+>  --mount type=bind,source="$(pwd)",target=/usr/share/nginx/html \
+>  $DOCKERID/linux_tweet_app:1.0
+docker: invalid reference format.
+See 'docker run --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker container run \
+>  --detach \
+>  --publish 80:80 \
+>  --name linux_tweet_app \
+>  --mount type=bind,source="$(pwd)",target=/usr/share/nginx/html \
+>  $DOCKERID/linux_tweet_app:1.0
+docker: invalid reference format.
+See 'docker run --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker container run \
+>  --detach \
+>  --publish 80:80 \
+>  --name linux_tweet_app \
+>  --mount type=bind,source="$(pwd)",target=/usr/share/nginx/html \
+>  $DOCKERID/linux_tweet_app:1.0
+docker: invalid reference format.
+See 'docker run --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker container run \
+>  --detach \
+>  --publish 80:80 \
+>  --name linux_tweet_app \
+>  --mount type=bind,source="$(pwd)",target=/usr/share/nginx/html \
+>  $DOCKERID/linux_tweet_app:1.0
+docker: invalid reference format.
+See 'docker run --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker container run \
+>  --detach \
+>  --publish 80:80 \
+>  --name linux_tweet_app \
+>  --mount type=bind,source="$(pwd)",target=/usr/share/nginx/html \
+>  $DOCKERID/linux_tweet_app:1.0
+docker: invalid reference format.
+See 'docker run --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker container run \
+>  --detach \
+>  --publish 80:80 \
+>  --name linux_tweet_app \
+>  --mount type=bind,source="$(pwd)",target=/usr/share/nginx/html \
+>  $DOCKERID/linux_tweet_app:1.0
+docker: invalid reference format.
+See 'docker run --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker container run \
+>  --detach \
+>  --publish 80:80 \
+>  --name linux_tweet_app \
+>  --mount type=bind,source="$(pwd)",target=/usr/share/nginx/html \
+>  $DOCKERID/linux_tweet_app:1.0
+docker: invalid reference format.
+See 'docker run --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$ l
+bash: l: command not found
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$ ls
+Dockerfile           index-new.html       index.html
+README.md            index-original.html  linux.png
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  cp index-new.html index.html
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  cp index-new.html index.html
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  cp index-new.html index.html
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker rm --force linux_tweet_app
+Error: No such container: linux_tweet_app
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker rm --force linux_tweet_app
+Error: No such container: linux_tweet_app
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker container run \
+>  --detach \
+>  --publish 80:80 \
+>  --name linux_tweet_app \
+>  $DOCKERID/linux_tweet_app:1.0
+docker: invalid reference format.
+See 'docker run --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker container run \
+>  --detach \
+>  --publish 80:80 \
+>  --name linux_tweet_app \
+>  $DOCKERID/linux_tweet_app:1.0
+docker: invalid reference format.
+See 'docker run --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$ docker rm --force linux_tweet_app
+Error: No such container: linux_tweet_app
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$ docker rm --force linux_tweet_app
+Error: No such container: linux_tweet_app
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$ docker rm --force linux_tweet_app
+Error: No such container: linux_tweet_app
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$ docker rm --force linux_tweet_app
+Error: No such container: linux_tweet_app
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$ docker rm --force linux_tweet_app
+Error: No such container: linux_tweet_app
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$ docker rm --force linux_tweet_app
+Error: No such container: linux_tweet_app
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$ docker rm --force linux_tweet_app
+Error: No such container: linux_tweet_app
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker image build --tag $DOCKERID/linux_tweet_app:2.0 .
+invalid argument "/linux_tweet_app:2.0" for "-t, --tag" flag: invalid reference format
+See 'docker image build --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker image build --tag $DOCKERID/linux_tweet_app:2.0 .
+invalid argument "/linux_tweet_app:2.0" for "-t, --tag" flag: invalid reference format
+See 'docker image build --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker image build --tag $DOCKERID/linux_tweet_app:2.0 .
+invalid argument "/linux_tweet_app:2.0" for "-t, --tag" flag: invalid reference format
+See 'docker image build --help'.
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker image ls
+REPOSITORY   TAG       IMAGE ID       CREATED       SIZE
+alpine       latest    042a816809aa   6 days ago    7.05MB
+ubuntu       latest    6b7dfa7e8fdb   5 weeks ago   77.8MB
+[node1] (local) root@192.168.0.13 ~/linux_tweet_app
+$  docker image ls
+REPOSITORY   TAG       IMAGE ID       CREATED       SIZE
+alpine       latest    042a816809aa   6 days ago    7.05MB
+ubuntu       latest    6b7dfa7e8fdb   5 weeks ago   77.8MB
