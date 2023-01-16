@@ -1,0 +1,956 @@
+5b282ee9da04: Pull complete
+03f027d5e312: Pull complete
+741e8aa30cc2: Pull complete
+5ceb79cda400: Pull complete
+f2c00c886d59: Pull complete
+Digest: sha256:5f004bbd8b9b6ae1478fee7d4dfbf38305af7188946aa79925667fa658458ba9
+Status: Downloaded newer image for python:3
+ ---> afe5735f16e1
+Step 2/8 : LABEL      maintainer="Sawood Alam <@ibnesayeed>"
+ ---> Running in 365b4f1bb00a
+Removing intermediate container 365b4f1bb00a
+ ---> ac02cb304cc6
+Step 3/8 : RUN        pip install beautifulsoup4
+ ---> Running in 6ac03cb95b59
+Collecting beautifulsoup4
+  Downloading beautifulsoup4-4.11.1-py3-none-any.whl (128 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 128.2/128.2 kB 9.2 MB/s eta 0:00:00
+Collecting soupsieve>1.2
+  Downloading soupsieve-2.3.2.post1-py3-none-any.whl (37 kB)
+Installing collected packages: soupsieve, beautifulsoup4
+Successfully installed beautifulsoup4-4.11.1 soupsieve-2.3.2.post1
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+Removing intermediate container 6ac03cb95b59
+ ---> b920c6074ab8
+Step 4/8 : RUN        pip install requests
+ ---> Running in 4ef59bea1195
+Collecting requests
+  Downloading requests-2.28.2-py3-none-any.whl (62 kB)
+     ━━━━━━━━━━━━━━━━━━━━━���━━━━━━━━━━━━━━━━━━ 62.8/62.8 kB 6.4 MB/s eta 0:00:00
+Collecting charset-normalizer<4,>=2
+  Downloading charset_normalizer-3.0.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (196 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 196.8/196.8 kB 4.3 MB/s eta 0:00:00
+Collecting idna<4,>=2.5
+  Downloading idna-3.4-py3-none-any.whl (61 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 61.5/61.5 kB 1.9 MB/s eta 0:00:00
+Collecting urllib3<1.27,>=1.21.1
+  Downloading urllib3-1.26.14-py2.py3-none-any.whl (140 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 140.6/140.6 kB 5.1 MB/s eta 0:00:00
+Collecting certifi>=2017.4.17
+  Downloading certifi-2022.12.7-py3-none-any.whl (155 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 155.3/155.3 kB 6.9 MB/s eta 0:00:00
+Installing collected packages: charset-normalizer, urllib3, idna, certifi, requests
+Successfully installed certifi-2022.12.7 charset-normalizer-3.0.1 idna-3.4 requests-2.28.2 urllib3-1.26.14
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+Removing intermediate container 4ef59bea1195
+ ---> 90d696e027a8
+Step 5/8 : WORKDIR    /app
+ ---> Running in 3a667e135217
+Removing intermediate container 3a667e135217
+ ---> 8c9ab3b375d7
+Step 6/8 : COPY       linkextractor.py /app/
+ ---> 05c6d6c3d9bb
+Step 7/8 : RUN        chmod a+x linkextractor.py
+ ---> Running in 2a934bfece99
+Removing intermediate container 2a934bfece99
+ ---> 2059374b4631
+Step 8/8 : ENTRYPOINT ["./linkextractor.py"]
+ ---> Running in 90278472ef69
+Removing intermediate container 90278472ef69
+ ---> 828589c870bc
+Successfully built 828589c870bc
+Successfully tagged linkextractor:step1
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ docker image ls
+REPOSITORY      TAG       IMAGE ID       CREATED          SIZE
+linkextractor   step1     828589c870bc   21 seconds ago   948MB
+python          3         afe5735f16e1   4 days ago       932MB
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ docker container run -it --rm linkextractor:step1 http://example.com/
+docker container run -it --rm linkextractor:step1 https://training.play-with-docker.com/
+https://www.iana.org/domains/example
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ git checkout step2
+branch 'step2' set up to track 'origin/step2'.
+Switched to a new branch 'step2'
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ tree
+.
+├── Dockerfile
+├── README.md
+└── linkextractor.py
+
+0 directories, 3 files
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ cat linkextractor.py
+#!/usr/bin/env python
+
+import sys
+import requests
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin
+
+def extract_links(url):
+    res = requests.get(url)
+    soup = BeautifulSoup(res.text, "html.parser")
+    base = url
+    # TODO: Update base if a <base> element is present with the href attribute
+    links = []
+    for link in soup.find_all("a"):
+        links.append({
+            "text": " ".join(link.text.split()) or "[IMG]",
+            "href": urljoin(base, link.get("href"))
+        })
+    return links
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("\nUsage:\n\t{} <URL>\n".format(sys.argv[0]))
+        sys.exit(1)
+    for link in extract_links(sys.argv[-1]):
+        print("[{}]({})".format(link["text"], link["href"]))
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ docker image build -t linkextractor:step2 .
+Sending build context to Docker daemon  113.7kB
+Step 1/8 : FROM       python:3
+ ---> afe5735f16e1
+Step 2/8 : LABEL      maintainer="Sawood Alam <@ibnesayeed>"
+ ---> Using cache
+ ---> ac02cb304cc6
+Step 3/8 : RUN        pip install beautifulsoup4
+ ---> Using cache
+ ---> b920c6074ab8
+Step 4/8 : RUN        pip install requests
+ ---> Using cache
+ ---> 90d696e027a8
+Step 5/8 : WORKDIR    /app
+ ---> Using cache
+ ---> 8c9ab3b375d7
+Step 6/8 : COPY       linkextractor.py /app/
+ ---> d134cc06e2f5
+Step 7/8 : RUN        chmod a+x linkextractor.py
+ ---> Running in 4b1e1c2bd8c1
+Removing intermediate container 4b1e1c2bd8c1
+ ---> bf5696f9bf3d
+Step 8/8 : ENTRYPOINT ["./linkextractor.py"]
+ ---> Running in fdce2e5ea7cf
+Removing intermediate container fdce2e5ea7cf
+ ---> 57b70b3c8e57
+Successfully built 57b70b3c8e57
+Successfully tagged linkextractor:step2
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ docker image ls
+REPOSITORY      TAG       IMAGE ID       CREATED              SIZE
+linkextractor   step2     57b70b3c8e57   About a minute ago   948MB
+linkextractor   step1     828589c870bc   4 minutes ago        948MB
+python          3         afe5735f16e1   4 days ago           932MB
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ docker container run -it --rm linkextractor:step2 https://training.play-with-docker.com/
+[Play with Docker classroom](https://training.play-with-docker.com/)
+[About](https://training.play-with-docker.com/about/)
+[IT Pros and System Administrators](https://training.play-with-docker.com/#ops)
+[Developers](https://training.play-with-docker.com/#dev)
+[Stage 1: The Basics](https://training.play-with-docker.com/ops-stage1)
+[Stage 2: Digging Deeper](https://training.play-with-docker.com/ops-stage2)
+[Stage 3: Moving to Production](https://training.play-with-docker.com/ops-stage3)
+[Stage 1: The Basics](https://training.play-with-docker.com/dev-stage1)
+[Stage 2: Digging Deeper](https://training.play-with-docker.com/dev-stage2)
+[Stage 3: Moving to Staging](https://training.play-with-docker.com/dev-stage3)
+[Full list of individual labs](https://training.play-with-docker.com/alacart)
+[[IMG]](https://twitter.com/intent/tweet?text=Play with Docker Classroom&url=https://training.play-with-docker.com/&via=docker&related=docker)
+[[IMG]](https://facebook.com/sharer.php?u=https://training.play-with-docker.com/)
+[[IMG]](https://plus.google.com/share?url=https://training.play-with-docker.com/)
+[[IMG]](http://www.linkedin.com/shareArticle?mini=true&url=https://training.play-with-docker.com/&title=Play%20with%20Docker%20Classroom&source=https://training.play-with-docker.com)
+[[IMG]](https://www.docker.com/dockercon/)
+[Sign up today](https://www.docker.com/dockercon/)
+[Register here](https://dockr.ly/slack)
+[here](https://www.docker.com/legal/docker-terms-service)
+[[IMG]](https://www.docker.com)
+[[IMG]](https://www.facebook.com/docker.run)
+[[IMG]](https://twitter.com/docker)
+[[IMG]](https://www.github.com/play-with-docker/play-with-docker.github.io)
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ docker container run -it --rm linkextractor:step1 https://training.play-with-docker.com/
+/
+/about/
+#ops
+#dev
+/ops-stage1
+/ops-stage2
+/ops-stage3
+/dev-stage1
+/dev-stage2
+/dev-stage3
+/alacart
+https://twitter.com/intent/tweet?text=Play with Docker Classroom&url=https://training.play-with-docker.com/&via=docker&related=docker
+https://facebook.com/sharer.php?u=https://training.play-with-docker.com/
+https://plus.google.com/share?url=https://training.play-with-docker.com/
+http://www.linkedin.com/shareArticle?mini=true&url=https://training.play-with-docker.com/&title=Play%20with%20Docker%20Classroom&source=https://training.play-with-docker.com
+https://www.docker.com/dockercon/
+https://www.docker.com/dockercon/
+https://dockr.ly/slack
+https://www.docker.com/legal/docker-terms-service
+https://www.docker.com
+https://www.facebook.com/docker.run
+https://twitter.com/docker
+https://www.github.com/play-with-docker/play-with-docker.github.io
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ git checkout step3
+branch 'step3' set up to track 'origin/step3'.
+Switched to a new branch 'step3'
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ tree
+.
+├── Dockerfile
+├── README.md
+├── linkextractor.py
+├── main.py
+└── requirements.txt
+
+0 directories, 5 files
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ cat Dockerfile
+FROM       python:3
+LABEL      maintainer="Sawood Alam <@ibnesayeed>"
+
+WORKDIR    /app
+COPY       requirements.txt /app/
+RUN        pip install -r requirements.txt
+
+COPY       *.py /app/
+RUN        chmod a+x *.py
+
+CMD        ["./main.py"]
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ cat main.py
+#!/usr/bin/env python
+
+from flask import Flask
+from flask import request
+from flask import jsonify
+from linkextractor import extract_links
+
+app = Flask(__name__)
+
+@app.route("/")
+def index():
+    return "Usage: http://<hostname>[:<prt>]/api/<url>"
+
+@app.route("/api/<path:url>")
+def api(url):
+    qs = request.query_string.decode("utf-8")
+    if qs != "":
+        url += "?" + qs
+    links = extract_links(url)
+    return jsonify(links)
+
+app.run(host="0.0.0.0")
+[node1] (local) root@192.168.0.8 ~/linkextractor
+docker image build -t linkextractor:step3 .
+Sending build context to Docker daemon  118.8kB
+Step 1/8 : FROM       python:3
+ ---> afe5735f16e1
+Step 2/8 : LABEL      maintainer="Sawood Alam <@ibnesayeed>"
+ ---> Using cache
+ ---> ac02cb304cc6
+Step 3/8 : WORKDIR    /app
+ ---> Running in cd9f220c10a3
+Removing intermediate container cd9f220c10a3
+ ---> 0cb392e6f080
+Step 4/8 : COPY       requirements.txt /app/
+ ---> 00222b1e867a
+Step 5/8 : RUN        pip install -r requirements.txt
+ ---> Running in e96e60728b5f
+docker container run -d -p 5000:5000 --name=linkextractor linkextractor:step3
+Collecting beautifulsoup4
+  Downloading beautifulsoup4-4.11.1-py3-none-any.whl (128 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 128.2/128.2 kB 1.1 MB/s eta 0:00:00
+Collecting flask
+  Downloading Flask-2.2.2-py3-none-any.whl (101 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 101.5/101.5 kB 1.8 MB/s eta 0:00:00
+Collecting requests
+  Downloading requests-2.28.2-py3-none-any.whl (62 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 62.8/62.8 kB 1.3 MB/s eta 0:00:00
+Collecting soupsieve>1.2
+  Downloading soupsieve-2.3.2.post1-py3-none-any.whl (37 kB)
+Collecting Werkzeug>=2.2.2
+  Downloading Werkzeug-2.2.2-py3-none-any.whl (232 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 232.7/232.7 kB 1.3 MB/s eta 0:00:00
+Collecting Jinja2>=3.0
+  Downloading Jinja2-3.1.2-py3-none-any.whl (133 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 133.1/133.1 kB 2.3 MB/s eta 0:00:00
+Collecting itsdangerous>=2.0
+  Downloading itsdangerous-2.1.2-py3-none-any.whl (15 kB)
+Collecting click>=8.0
+  Downloading click-8.1.3-py3-none-any.whl (96 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 96.6/96.6 kB 3.1 MB/s eta 0:00:00
+Collecting charset-normalizer<4,>=2
+  Downloading charset_normalizer-3.0.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (196 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 196.8/196.8 kB 1.4 MB/s eta 0:00:00
+Collecting idna<4,>=2.5
+  Downloading idna-3.4-py3-none-any.whl (61 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 61.5/61.5 kB 721.5 kB/s eta 0:00:00
+Collecting urllib3<1.27,>=1.21.1
+  Downloading urllib3-1.26.14-py2.py3-none-any.whl (140 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 140.6/140.6 kB 12.8 MB/s eta 0:00:00
+Collecting certifi>=2017.4.17
+  Downloading certifi-2022.12.7-py3-none-any.whl (155 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 155.3/155.3 kB 1.1 MB/s eta 0:00:00
+Collecting MarkupSafe>=2.0
+  Downloading MarkupSafe-2.1.1.tar.gz (18 kB)
+  Preparing metadata (setup.py): started
+  Preparing metadata (setup.py): finished with status 'done'
+Building wheels for collected packages: MarkupSafe
+  Building wheel for MarkupSafe (setup.py): started
+  Building wheel for MarkupSafe (setup.py): finished with status 'done'
+  Created wheel for MarkupSafe: filename=MarkupSafe-2.1.1-cp311-cp311-linux_x86_64.whl size=27471 sha256=964741914fc29a26b7beddea6fd7ae1171166e61b4f9ce6c4ad89eda97208429
+  Stored in directory: /root/.cache/pip/wheels/96/ee/62/407c247ad088bcb67b530ba3ac1479058c58a651bd6bf09a1f
+Successfully built MarkupSafe
+Installing collected packages: charset-normalizer, urllib3, soupsieve, MarkupSafe, itsdangerous, idna, click, certifi, Werkzeug, requests, Jinja2, beautifulsoup4, flask
+Successfully installed Jinja2-3.1.2 MarkupSafe-2.1.1 Werkzeug-2.2.2 beautifulsoup4-4.11.1 certifi-2022.12.7 charset-normalizer-3.0.1 click-8.1.3 flask-2.2.2 idna-3.4 itsdangerous-2.1.2 requests-2.28.2 soupsieve-2.3.2.post1 urllib3-1.26.14
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+Removing intermediate container e96e60728b5f
+ ---> 93456a003e2a
+Step 6/8 : COPY       *.py /app/
+ ---> 4d332399a50c
+Step 7/8 : RUN        chmod a+x *.py
+ ---> Running in acbc3747288e
+Removing intermediate container acbc3747288e
+ ---> 6285bae10b4e
+Step 8/8 : CMD        ["./main.py"]
+ ---> Running in 2e4d289667ab
+Removing intermediate container 2e4d289667ab
+ ---> 2074facd222e
+Successfully built 2074facd222e
+Successfully tagged linkextractor:step3
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ docker container run -d -p 5000:5000 --name=linkextractor linkextractor:step3
+2bf946d0ebcee1f6679a9c00a85e419396ca3fab9f8de83e324b98f0bacb07e6
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ docker container ls
+CONTAINER ID   IMAGE                 COMMAND       CREATED          STATUS   PORTS                    NAMES
+2bf946d0ebce   linkextractor:step3   "./main.py"   17 seconds ago   Up 13 seconds   0.0.0.0:5000->5000/tcp   linkextractor
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ curl -i http://localhost:5000/api/http://example.com/
+HTTP/1.1 200 OK
+Server: Werkzeug/2.2.2 Python/3.11.1
+Date: Mon, 16 Jan 2023 12:47:30 GMT
+Content-Type: application/json
+Content-Length: 79
+Connection: close
+
+[{"href":"https://www.iana.org/domains/example","text":"More information..."}]
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ docker container logs linkextractor
+ * Serving Flask app 'main'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment.Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.17.0.2:5000
+Press CTRL+C to quit
+172.17.0.1 - - [16/Jan/2023 12:47:30] "GET /api/http://example.com/ HTTP/1.1" 200 -
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ docker container logs linkextractor
+ * Serving Flask app 'main'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment.Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.17.0.2:5000
+Press CTRL+C to quit
+172.17.0.1 - - [16/Jan/2023 12:47:30] "GET /api/http://example.com/ HTTP/1.1" 200 -
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ docker container rm -f linkextractor
+linkextractor
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ git checkout step4
+branch 'step4' set up to track 'origin/step4'.
+Switched to a new branch 'step4'
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ tree
+.
+├── README.md
+├── api
+│   ├── Dockerfile
+│   ├── linkextractor.py
+│   ├── main.py
+│   └── requirements.txt
+├── docker-compose.yml
+└── www
+    └── index.php
+
+2 directories, 7 files
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ cat docker-compose.yml
+version: '3'
+
+services:
+  api:
+    image: linkextractor-api:step4-python
+    build: ./api
+    ports:
+      - "5000:5000"
+  web:
+    image: php:7-apache
+    ports:
+      - "80:80"
+    environment:
+      - API_ENDPOINT=http://api:5000/api/
+    volumes:
+      - ./www:/var/www/html
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ cat www/index.php
+<!DOCTYPE html>
+
+<?php
+  $api_endpoint = $_ENV["API_ENDPOINT"] ?: "http://localhost:5000/api/";
+  $url = "";
+  if(isset($_GET["url"]) && $_GET["url"] != "") {
+    $url = $_GET["url"];
+    $json = @file_get_contents($api_endpoint . $url);
+    if($json == false) {
+      $err = "Something is wrong with the URL: " . $url;
+    } else {
+      $links = json_decode($json, true);
+      $domains = [];
+      foreach($links as $link) {
+        array_push($domains, parse_url($link["href"], PHP_URL_HOST));
+      }
+      $domainct = @array_count_values($domains);
+      arsort($domainct);
+    }
+  }
+?>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Link Extractor</title>
+    <style media="screen">
+      html {
+        background: #EAE7D6;
+        font-family: sans-serif;
+      }
+      body {
+        margin: 0;
+      }
+      h1 {
+        padding: 10px;
+        margin: 0 auto;
+        color: #EAE7D6;
+        max-width: 600px;
+      }
+      h1 a {
+        text-decoration: none;
+        color: #EAE7D6;
+      }
+      h2 {
+        background: #082E41;
+        color: #EAE7D6;
+        margin: -10px;
+        padding: 10px;
+      }
+      p {
+        margin: 25px 5px 5px;
+      }
+      section {
+        max-width: 600px;
+        margin: 10px auto;
+        padding: 10px;
+        border: 1px solid #082E41;
+      }
+      div.header {
+        background: #082E41;
+        margin: 0;
+      }
+      div.footer {
+        background: #082E41;
+        margin: 0;
+        padding: 5px;
+      }
+      .footer p {
+        margin: 0 auto;
+        max-width: 600px;
+        color: #EAE7D6;
+        text-align: center;
+      }
+      .footer p a {
+        color: #24C2CB;
+        text-decoration: none;
+      }
+      .error {
+        color: #DA2536;
+      }
+      form {
+        display: flex;
+      }
+      input {
+        font-size: 20px;
+        padding: 3px;
+        height: 40px;
+      }
+      input.text {
+        box-sizing:border-box;
+        flex-grow: 1;
+        border-color: #082E41;
+      }
+      input.button {
+        width: 150px;
+        background: #082E41;
+        border-color: #082E41;
+        color: #EAE7D6;
+      }
+      table {
+        width: 100%;
+        text-align: left;
+        margin-top: 10px;
+      }
+      table th, table td {
+        padding: 3px;
+      }
+      table th:last-child, table td:last-child {
+        width: 70px;
+        text-align: right;
+      }
+      table th {
+        border-top: 1px solid #082E41;
+        border-bottom: 1px solid #082E41;
+      }
+      table tr:last-child td {
+        border-top: 1px solid #082E41;
+        border-bottom: 1px solid #082E41;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1><a href="/">Link Extractor</a></h1>
+    </div>
+
+    <section>
+      <form action="/">
+        <input class="text" type="text" name="url" placeholder="http://example.com/" value="<?php echo $url; ?>">
+        <input class="button" type="submit" value="Extract Links">
+      </form>
+    </section>
+
+    <?php if(isset($err)): ?>
+      <section>
+        <h2>Error</h2>
+        <p class="error"><?php echo $err; ?></p>
+      </section>
+    <?php endif; ?>
+
+    <?php if($url != "" && !isset($err)): ?>
+      <section>
+        <h2>Summary</h2>
+        <p>
+          <strong>Page:</strong> <?php echo "<a href=\"" . $url . "\">" . $url ."</a>"; ?>
+        </p>
+        <table>
+          <tr>
+            <th>Domain</th>
+            <th># Links</th>
+          </tr>
+          <?php
+            foreach($domainct as $key => $value) {
+              echo "<tr>";
+              echo "<td>" . $key . "</td>";
+              echo "<td>" . $value . "</td>";
+              echo "</tr>";
+            }
+          ?>
+          <tr>
+            <td><strong>Total</strong></td>
+            <td><strong><?php echo count($links); ?></strong></td>
+          </tr>
+        </table>
+      </section>
+
+      <section>
+        <h2>Links</h2>
+        <ul>
+        <?php
+          foreach($links as $link) {
+            echo "<li><a href=\"" . $link["href"] . "\">" . $link["text"] . "</a></li>";
+          }
+        ?>
+        </ul>
+      </section>
+    <?php endif; ?>
+
+    <div class="footer">
+      <p><a href="https://github.com/ibnesayeed/linkextractor">Link Extractor</a> by <a href="https://twitter.com/ibnesayeed">@ibnesayeed</a> from
+        <a href="https://ws-dl.cs.odu.edu/">WS-DL, ODU</a>
+      </p>
+    </div>
+  </body>
+</html>
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ docker-compose up -d --build
+[+] Running 2/14
+ ⠦ web Pulling                                                             56.7s
+   ⠿ a603fa5e3b41 Pull complete                                            30.2s
+   ⠿ c428f1a49423 Pull complete                                            30.5s
+   ⠸ 156740b07ef8 Extracting       91.63MB/91.63M...                       56.4s
+   ⠸ fb5a4c8af82f Download complete                                        56.4s
+   ⠸ 25f85b498fd5 Download complete                                        56.4s
+   ⠸ 9b233e420ac7 Download complete                                        56.4s
+   ⠸ fe42347c4ecf Download complete                                        56.4s
+   ⠸ d14eb2ed1e17 Download complete                                        56.4s
+   ⠸ 66d98f73acb6 Download complete                                        56.4s
+   ⠸ d2c43c5efbc8 Download complete                                        56.4s
+   ⠸ ab590b48ea47 Download complete                                        56.4s
+   ⠸ 80692ae2d067 Download complete                                        56.4s
+   ⠸ 05e465aaa99a Download complete                                        56.4s
+failed to register layer: Error processing tar file(exit status 1): write /usr/lib/file/magic.mgc: no space left on device
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ docker container ls
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ curl -i http://localhost:5000/api/http://example.com/
+curl: (7) Failed to connect to localhost port 5000 after 0 ms: Connection refused
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ sed -i 's/Link Extractor/Super Link Extractor/g' www/index.php
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ git reset --hard
+HEAD is now at 2a3ec3e Synchronize branch step4
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ docker-compose down
+Warning: No resource found to remove for project "linkextractor".
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ git checkout step5
+branch 'step5' set up to track 'origin/step5'.
+Switched to a new branch 'step5'
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ tree
+.
+├── README.md
+├── api
+│   ├── Dockerfile
+│   ├── linkextractor.py
+│   ├── main.py
+│   └── requirements.txt
+├── docker-compose.yml
+└── www
+    ├── Dockerfile
+    └── index.php
+
+2 directories, 8 files
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ cat www/Dockerfile
+FROM       php:7-apache
+LABEL      maintainer="Sawood Alam <@ibnesayeed>"
+
+ENV        API_ENDPOINT="http://localhost:5000/api/"
+
+COPY       . /var/www/html/
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ cat api/main.py
+#!/usr/bin/env python
+
+import os
+import json
+import redis
+from flask import Flask
+from flask import request
+from linkextractor import extract_links
+
+app = Flask(__name__)
+redis_conn = redis.from_url(os.getenv("REDIS_URL", "redis://localhost:6379"))
+
+@app.route("/")
+def index():
+    return "Usage: http://<hostname>[:<prt>]/api/<url>"
+
+@app.route("/api/<path:url>")
+def api(url):
+    qs = request.query_string.decode("utf-8")
+    if qs != "":
+        url += "?" + qs
+
+    jsonlinks = redis_conn.get(url)
+    if not jsonlinks:
+        links = extract_links(url)
+        jsonlinks = json.dumps(links, indent=2)
+        redis_conn.set(url, jsonlinks)
+
+    response = app.response_class(
+        status=200,
+        mimetype="application/json",
+        response=jsonlinks
+    )
+
+    return response
+
+app.run(host="0.0.0.0")
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ cat docker-compose.yml
+version: '3'
+
+services:
+  api:
+    image: linkextractor-api:step5-python
+    build: ./api
+    ports:
+      - "5000:5000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+  web:
+    image: linkextractor-web:step5-php
+    build: ./www
+    ports:
+      - "80:80"
+    environment:
+      - API_ENDPOINT=http://api:5000/api/
+  redis:
+    image: redis
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ docker-compose up -d --build
+[+] Running 7/7
+ ⠿ redis Pulled                                                            20.3s
+   ⠿ 8740c948ffd4 Pull complete                                            16.9s
+   ⠿ a2271c958e57 Pull complete                                            17.1s
+   ⠿ 495af11a3eac Pull complete                                            17.6s
+   ⠿ 20d8f888dfb3 Pull complete                                            18.9s
+   ⠿ 43f7f644570b Pull complete                                            19.4s
+   ⠿ 95e0e23bb0c6 Pull complete                                            19.8s
+[+] Building 30.4s (13/16)
+ => [linkextractor-api:step5-python internal] load build definition from D  0.1s
+ => => transferring dockerfile: 325B                                        0.0s
+ => [linkextractor-api:step5-python internal] load .dockerignore            0.0s
+ => => transferring context: 2B                                             0.0s
+ => [linkextractor-web:step5-php internal] load build definition from Dock  0.0s
+ => => transferring dockerfile: 196B                                        0.0s
+ => [linkextractor-api:step5-python internal] load metadata for docker.io/  0.0s
+ => [linkextractor-api:step5-python internal] load build context            0.1s
+ => => transferring context: 1.75kB                                         0.0s
+ => [linkextractor-api:step5-python 1/6] FROM docker.io/library/python:3    0.4s
+ => [linkextractor-api:step5-python 2/6] WORKDIR    /app                    0.2s
+ => [linkextractor-api:step5-python 3/6] COPY       requirements.txt /app/  0.2s
+ => [linkextractor-web:step5-php internal] load .dockerignore               0.0s
+ => => transferring context: 2B                                             0.0s
+ => CANCELED [linkextractor-api:step5-python 4/6] RUN        pip install   26.8s
+ => [linkextractor-web:step5-php internal] load metadata for docker.io/lib  0.8s
+ => ERROR [linkextractor-web:step5-php 1/2] FROM docker.io/library/php:7-  25.2s
+ => => resolve docker.io/library/php:7-apache@sha256:c9d7e608f738326734797  0.0s
+ => => sha256:a603fa5e3b4127f210503aaa6189abf6286ee5a73d 31.41MB / 31.41MB  3.8s
+ => => sha256:c9d7e608f73832673479770d66aacc8100011ec751d1 1.86kB / 1.86kB  0.0s
+ => => sha256:156740b07ef8a632f9f7bea4e57e4ee5541ade376a 91.63MB / 91.63MB  5.7s
+ => => sha256:20a3732f422b7b28dcf99e8597f093a8c135efca62 12.51kB / 12.51kB  0.0s
+ => => sha256:c428f1a494230852524a2a5957cc5199c36c8b403305e0e8 226B / 226B  0.1s
+ => => sha256:18b3497ee7f2099a90b66c23a0bc3d5261b12bab3672 3.04kB / 3.04kB  0.0s
+ => => sha256:fb5a4c8af82f00730b7427e47bda7f76cea2e2b9aea42175 270B / 270B  0.5s
+ => => sha256:25f85b498fd5bfc6cce951513219fe480850daba71 19.25MB / 19.25MB  3.6s
+ => => sha256:9b233e420ac7bbca645bb82c213029762acf1742400c0763 475B / 475B  3.8s
+ => => sha256:fe42347c4ecfc90333acd9cad13912387eea39d13827a25c 514B / 514B  3.8s
+ => => sha256:d2c43c5efbc861f83ee6565c7102ca660d6f35e158 10.20MB / 10.20MB  4.4s
+ => => sha256:d14eb2ed1e17ae00f5fcb44b0d562e2867c401c203 10.76MB / 10.76MB  4.2s
+ => => sha256:66d98f73acb62e86c0c226f9eedcbc7eda305df0c1e171ca 491B / 491B  3.8s
+ => => sha256:ab590b48ea476386dd7b07c34de9eff7cf2103c4668a 2.46kB / 2.46kB  4.4s
+ => => sha256:80692ae2d067c8358112c56490a2a97f69ef395fd8f7662a 246B / 246B  4.5s
+ => => sha256:05e465aaa99a358add4acecdade8f39843089069f31fea02 892B / 892B  4.6s
+ => => extracting sha256:a603fa5e3b4127f210503aaa6189abf6286ee5a73deeaab4  16.2s
+ => [linkextractor-web:step5-php internal] load build context               0.0s
+ => => transferring context: 4.63kB                                         0.0s
+------
+ > [linkextractor-web:step5-php 1/2] FROM docker.io/library/php:7-apache@sha256:c9d7e608f73832673479770d66aacc8100011ec751d1905ff63fae3fe2e0ca6d:
+------
+failed to solve: failed to register layer: Error processing tar file(exit status1): write /usr/bin/rev: no space left on device
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ docker-compose exec redis redis-cli monitor
+service "redis" is not running container #1
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ sed -i 's/Link Extractor/Super Link Extractor/g' www/index.php
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ git reset --hard
+HEAD is now at 3dbb7eb Synchronize branch step5
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ docker-compose down
+Warning: No resource found to remove for project "linkextractor".
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ git checkout step6
+branch 'step6' set up to track 'origin/step6'.
+Switched to a new branch 'step6'
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ tree
+.
+├── README.md
+├── api
+│   ├── Dockerfile
+│   ├── Gemfile
+│   └── linkextractor.rb
+├── docker-compose.yml
+├── logs
+└── www
+    ├── Dockerfile
+    └── index.php
+
+3 directories, 7 files
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ cat api/linkextractor.rb
+#!/usr/bin/env ruby
+# encoding: utf-8
+
+require "sinatra"
+require "open-uri"
+require "uri"
+require "nokogiri"
+require "json"
+require "redis"
+
+set :protection, :except=>:path_traversal
+
+redis = Redis.new(url: ENV["REDIS_URL"] || "redis://localhost:6379")
+
+Dir.mkdir("logs") unless Dir.exist?("logs")
+cache_log = File.new("logs/extraction.log", "a")
+
+get "/" do
+  "Usage: http://<hostname>[:<prt>]/api/<url>"
+end
+
+get "/api/*" do
+  url = [params['splat'].first, request.query_string].reject(&:empty?).join("?")
+  cache_status = "HIT"
+  jsonlinks = redis.get(url)
+  if jsonlinks.nil?
+    cache_status = "MISS"
+    jsonlinks = JSON.pretty_generate(extract_links(url))
+    redis.set(url, jsonlinks)
+  end
+
+  cache_log.puts "#{Time.now.to_i}\t#{cache_status}\t#{url}"
+
+  status 200
+  headers "content-type" => "application/json"
+  body jsonlinks
+end
+
+def extract_links(url)
+  links = []
+  doc = Nokogiri::HTML(open(url))
+  doc.css("a").each do |link|
+    text = link.text.strip.split.join(" ")
+    begin
+      links.push({
+        text: text.empty? ? "[IMG]" : text,
+        href: URI.join(url, link["href"])
+      })
+    rescue
+    end
+  end
+  links
+end
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ cat api/Dockerfile
+FROM       ruby:2.6
+LABEL      maintainer="Sawood Alam <@ibnesayeed>"
+
+ENV        LANG C.UTF-8
+ENV        REDIS_URL="redis://localhost:6379"
+
+WORKDIR    /app
+COPY       Gemfile /app/
+RUN        bundle install
+
+COPY       linkextractor.rb /app/
+RUN        chmod a+x linkextractor.rb
+
+CMD        ["./linkextractor.rb", "-o", "0.0.0.0"]
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ cat docker-compose.yml
+version: '3'
+
+services:
+  api:
+    image: linkextractor-api:step6-ruby
+    build: ./api
+    ports:
+      - "4567:4567"
+    environment:
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ./logs:/app/logs
+  web:
+    image: linkextractor-web:step6-php
+    build: ./www
+    ports:
+      - "80:80"
+    environment:
+      - API_ENDPOINT=http://api:4567/api/
+  redis:
+    image: redis
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ docker-compose up -d --build
+[+] Building 78.9s (8/16)
+[+] Building 82.0s (8/16)
+[+] Building 82.2s (8/16)
+[+] Building 104.4s (9/16)
+ => [linkextractor-web:step6-php internal] load build definition from Dock  0.1s
+ => => transferring dockerfile: 140B                                        0.0s
+ => [linkextractor-api:step6-ruby internal] load build definition from Doc  0.1s
+ => => transferring dockerfile: 373B                                        0.0s
+ => [linkextractor-web:step6-php internal] load .dockerignore               0.1s
+ => => transferring context: 2B                                             0.0s
+ => [linkextractor-api:step6-ruby internal] load .dockerignore              0.1s
+ => => transferring context: 2B                                             0.0s
+ => [linkextractor-web:step6-php internal] load metadata for docker.io/lib  0.2s
+ => [linkextractor-web:step6-php internal] load build context               0.0s
+ => => transferring context: 4.57kB                                         0.0s
+ => CANCELED [linkextractor-web:step6-php 1/2] FROM docker.io/library/ph  103.8s
+ => => resolve docker.io/library/php:7-apache@sha256:c9d7e608f738326734797  0.1s
+ => => sha256:c9d7e608f73832673479770d66aacc8100011ec751d1 1.86kB / 1.86kB  0.0s
+ => => sha256:a603fa5e3b4127f210503aaa6189abf6286ee5a73d 31.41MB / 31.41MB  5.6s
+ => => sha256:c428f1a494230852524a2a5957cc5199c36c8b403305e0e8 226B / 226B  0.2s
+ => => sha256:156740b07ef8a632f9f7bea4e57e4ee5541ade376 91.63MB / 91.63MB  11.7s
+ => => sha256:18b3497ee7f2099a90b66c23a0bc3d5261b12bab3672 3.04kB / 3.04kB  0.0s
+ => => sha256:20a3732f422b7b28dcf99e8597f093a8c135efca62 12.51kB / 12.51kB  0.0s
+ => => sha256:fb5a4c8af82f00730b7427e47bda7f76cea2e2b9aea42175 270B / 270B  0.3s
+ => => sha256:25f85b498fd5bfc6cce951513219fe480850daba71 19.25MB / 19.25MB  9.7s
+ => => sha256:9b233e420ac7bbca645bb82c213029762acf1742400c0763 475B / 475B  5.7s
+ => => sha256:fe42347c4ecfc90333acd9cad13912387eea39d13827a25c 514B / 514B  5.8s
+ => => sha256:d14eb2ed1e17ae00f5fcb44b0d562e2867c401c20 10.76MB / 10.76MB  10.5s
+ => => sha256:66d98f73acb62e86c0c226f9eedcbc7eda305df0c1e171ca 491B / 491B  9.9s
+ => => sha256:d2c43c5efbc861f83ee6565c7102ca660d6f35e15 10.20MB / 10.20MB  11.1s
+ => => extracting sha256:a603fa5e3b4127f210503aaa6189abf6286ee5a73deeaab4  51.7s
+ => => sha256:ab590b48ea476386dd7b07c34de9eff7cf2103c4668 2.46kB / 2.46kB  10.6s
+ => => sha256:80692ae2d067c8358112c56490a2a97f69ef395fd8f7662 246B / 246B  10.8s
+ => => sha256:05e465aaa99a358add4acecdade8f39843089069f31fea0 892B / 892B  11.0s
+ => => extracting sha256:c428f1a494230852524a2a5957cc5199c36c8b403305e0e87  0.0s
+ => => extracting sha256:156740b07ef8a632f9f7bea4e57e4ee5541ade376adf9169  30.0s
+ => [linkextractor-api:step6-ruby internal] load metadata for docker.io/li  1.2s
+ => ERROR [linkextractor-api:step6-ruby 1/6] FROM docker.io/library/ruby  102.6s
+ => => resolve docker.io/library/ruby:2.6@sha256:a79c8ddb7f3d3748427e2d3a4  0.1s
+ => => sha256:a79c8ddb7f3d3748427e2d3a45dcae6d42f1d80d9ae3 1.86kB / 1.86kB  0.0s
+ => => sha256:771a810704167e55da8a19970c5dfa6eb795dfee3254 2.00kB / 2.00kB  0.0s
+ => => sha256:b71cca836fff8e4f14f8575e25a157f3e253bcd1a039 7.29kB / 7.29kB  0.0s
+ => => sha256:6aefca2dc61dcbcd268b8a9861e552f9cdb69e572 54.94MB / 54.94MB  12.5s
+ => => sha256:967757d5652770cfa81b6cc7577d65e06d336173da1 5.16MB / 5.16MB  10.3s
+ => => sha256:c357e2c68cb3bf1e98dcb3eb6ceb16837253db715 10.87MB / 10.87MB  11.8s
+ => => sha256:c766e27afb21eddf9ab3e4349700ebe697c32a4c6 54.58MB / 54.58MB  19.8s
+ => => sha256:32a180f5cf85702e7680719c40c39c07972b117 196.70MB / 196.70MB  26.9s
+ => => sha256:ac0f2cbcefb35e4530dc103f764c05af8ab6b8a9de164b3 200B / 200B  12.8s
+ => => sha256:9c8a39a9be946d172ec9cb947630763435952f1e6 21.68MB / 21.68MB  16.6s
+ => => sha256:3fdd4263cfa33c03da28ce7a8157b2861fc47ac5e335e1f 175B / 175B  16.8s
+ => => extracting sha256:6aefca2dc61dcbcd268b8a9861e552f9cdb69e57242faec6  71.7s
+ => => extracting sha256:967757d5652770cfa81b6cc7577d65e06d336173da116d1fb  8.0s
+ => [linkextractor-api:step6-ruby internal] load build context              0.2s
+ => => transferring context: 1.30kB                                         0.0s
+------
+ > [linkextractor-api:step6-ruby 1/6] FROM docker.io/library/ruby:2.6@sha256:a79c8ddb7f3d3748427e2d3a45dcae6d42f1d80d9ae3b98959b3a27b220bf434:
+------
+failed to solve: failed to register layer: Error processing tar file(exit status1): write /usr/lib/x86_64-linux-gnu/liblber-2.4.so.2.11.5: no space left on device
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ docker-compose down
+Warning: No resource found to remove for project "linkextractor".
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ docker-compose down
+Warning: No resource found to remove for project "linkextractor".
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ docker-compose down
+Warning: No resource found to remove for project "linkextractor".
+[node1] (local) root@192.168.0.8 ~/linkextractor
+$ cat logs/extraction.log
+cat: can't open 'logs/extraction.log': No such file or directory
